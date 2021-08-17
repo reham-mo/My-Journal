@@ -3,7 +3,10 @@ const bodyParser = require("body-parser");
 const ejs = require("ejs");
 var _ = require('lodash');
 const mongoose = require('mongoose');
-mongoose.connect('mongodb+srv://admin-reham:Test123@cluster0.ii8xu.mongodb.net/blogDB', {useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.connect('mongodb+srv://admin-reham:Test123@cluster0.ii8xu.mongodb.net/blogDB', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
 
 const homeStartingContent = "Home Lacus vel facilisis volutpat est velit egestas dui id ornare. Semper auctor neque vitae tempus quam. Sit amet cursus sit amet dictum sit amet justo. Viverra tellus in hac habitasse. Imperdiet proin fermentum leo vel orci porta. Donec ultrices tincidunt arcu non sodales neque sodales ut. Mattis molestie a iaculis at erat pellentesque adipiscing. Magnis dis parturient montes nascetur ridiculus mus mauris vitae ultricies. Adipiscing elit ut aliquam purus sit amet luctus venenatis lectus. Ultrices vitae auctor eu augue ut lectus arcu bibendum at. Odio euismod lacinia at quis risus sed vulputate odio ut. Cursus mattis molestie a iaculis at erat pellentesque adipiscing.";
 const aboutContent = "About Hac habitasse platea dictumst vestibulum rhoncus est pellentesque. Dictumst vestibulum rhoncus est pellentesque elit ullamcorper. Non diam phasellus vestibulum lorem sed. Platea dictumst quisque sagittis purus sit. Egestas sed sed risus pretium quam vulputate dignissim suspendisse. Mauris in aliquam sem fringilla. Semper risus in hendrerit gravida rutrum quisque non tellus orci. Amet massa vitae tortor condimentum lacinia quis vel eros. Enim ut tellus elementum sagittis vitae. Mauris ultrices eros in cursus turpis massa tincidunt dui.";
@@ -21,8 +24,14 @@ app.use(express.static("public"));
 
 // blogdb schema
 const blogSchema = new mongoose.Schema({
-  title: {type: String, required: true},
-  content: {type: String, required: true}
+  title: {
+    type: String,
+    required: true
+  },
+  content: {
+    type: String,
+    required: true
+  }
 });
 
 // blogdb model/class
@@ -32,11 +41,11 @@ const Blog = mongoose.model("Blog", blogSchema);
 
 app.get("/", function(req, res) {
 
-  Blog.find({}, function(err, foundBlogs){
-      res.render("home", {
-        startingContent: homeStartingContent,
-        posts: foundBlogs
-      });
+  Blog.find({}, function(err, foundBlogs) {
+    res.render("home", {
+      startingContent: homeStartingContent,
+      posts: foundBlogs
+    });
   });
 });
 
@@ -59,16 +68,16 @@ app.get("/compose", function(req, res) {
 
 app.post("/compose", function(req, res) {
 
-const newBlog = new Blog({
-  title: req.body.postTitle,
-  content: req.body.postBody
-});
+  const newBlog = new Blog({
+    title: req.body.postTitle,
+    content: req.body.postBody
+  });
 
-newBlog.save(function(err){
-  if(!err){
-    res.redirect("/");
-  }
-});
+  newBlog.save(function(err) {
+    if (!err) {
+      res.redirect("/");
+    }
+  });
 });
 
 
@@ -76,42 +85,58 @@ app.get("/posts/:postId", function(req, res) {
   const requestedPostId = req.params.postId;
 
 
-Blog.findOne({_id: requestedPostId}, function(err, foundId){
-  if(foundId){
-    res.render("post", {
-      pageTitle: foundId.title,
-      pageContent: foundId.content
+  Blog.findOne({
+    _id: requestedPostId
+  }, function(err, foundId) {
+    if (foundId) {
+      res.render("post", {
+        pageTitle: foundId.title,
+        pageContent: foundId.content
+      });
+    } else {
+      console.log(err);
+    }
+  });
+});
+
+
+app.post("/delete", function(req, res) {
+
+  const theButton = req.body.button;
+
+  Blog.find({}, function(err, founddata) {
+
+    founddata.forEach(function(data) {
+      const theDeletedId = data.title;
+
+      if (theButton === theDeletedId) {
+
+        Blog.deleteOne({title: theButton}, function(err) {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log(`successfully deleted the post title: ${theDeletedId} from DB`);
+          }
+        });
+          res.redirect("/");
+      } else {
+        console.log(err);
+      }
+
     });
-  } else {
-    console.log(err);
-  }
-});
-});
 
 
-app.post("/delete", function(req, res){
-
-const deletedBlog = req.body.button;
-
-Blog.findOneAndRemove(deletedBlog, function(err){
-  if(err){
-    console.log(err);
-  } else {
-    console.log("successfully removed from the DB");
-  }
-});
-
-res.redirect("/");
+  });
 
 });
 
 
 
-let port = process.env.PORT;
-if (port == null || port == "") {
-  port = 3000;
-}
+// let port = process.env.PORT;
+// if (port == null || port == "") {
+//   port = 3000;
+// }
 
-app.listen(port, function() {
+app.listen(3000, function() {
   console.log("Server started on port 3000");
 });
