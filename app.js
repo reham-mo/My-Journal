@@ -84,10 +84,7 @@ app.post("/compose", function(req, res) {
 app.get("/posts/:postId", function(req, res) {
   const requestedPostId = req.params.postId;
 
-
-  Blog.findOne({
-    _id: requestedPostId
-  }, function(err, foundId) {
+  Blog.findOne({_id: requestedPostId}, function(err, foundId) {
     if (foundId) {
       res.render("post", {
         pageTitle: foundId.title,
